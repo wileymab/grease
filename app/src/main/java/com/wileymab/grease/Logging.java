@@ -18,10 +18,6 @@ public class Logging {
         Log.e(tag,String.format(formatString,params));
     }
 
-    public static void error(String formatString, String... params) {
-        Log.e("",String.format(formatString,params));
-    }
-
     public static void error(String tag, String message) {
         Log.e(tag,message);
     }
@@ -34,10 +30,6 @@ public class Logging {
 
     public static void debug(String tag, String formatString, Object... params) {
         Log.d(tag,String.format(formatString,params));
-    }
-
-    public static void debug(String formatString, String... params) {
-        Log.d("",String.format(formatString,params));
     }
 
     public static void debug(String tag, String message) {
