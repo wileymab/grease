@@ -1,0 +1,56 @@
+package com.wileymab.grease;
+
+import android.util.Log;
+
+/**
+ * Created by m441527 on 2/1/17.
+ */
+
+public class Logging {
+
+    public static <T> String tag(Class<T> clazz) {
+        return clazz.getSimpleName();
+    }
+
+    public static void error(String tag, String formatString, Object... params) {
+        Log.e(tag,String.format(formatString,params));
+    }
+
+    public static void error(String tag, String formatString, String... params) {
+        Log.e(tag,String.format(formatString,params));
+    }
+
+    public static void error(String formatString, String... params) {
+        Log.e(tag(Logging.class),String.format(formatString,params));
+    }
+
+    public static void error(String tag, String message) {
+        Log.e(tag,message);
+    }
+
+    public static void error(String message) {
+        Log.e(tag(Logging.class), message);
+    }
+
+
+    public static void debug(String tag, String formatString, Object... params) {
+        Log.d(tag,String.format(formatString,params));
+    }
+
+    public static void debug(String tag, String formatString, String... params) {
+        Log.d(tag,String.format(formatString,params));
+    }
+
+    public static void debug(String formatString, String... params) {
+        Log.d(tag(Logging.class),String.format(formatString,params));
+    }
+
+    public static void debug(String tag, String message) {
+        Log.d(tag,message);
+    }
+
+    public static void debug(String message) {
+        Log.d(tag(Logging.class), message);
+    }
+
+}
