@@ -1,0 +1,13 @@
+
+
+
+def installToMavenLocal() {
+
+    String artifactPath = 'app/build/outputs/aar/app-release.aar'
+
+
+
+}
+
+
+

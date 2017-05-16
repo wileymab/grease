@@ -6,3 +6,5 @@
 /build
 /captures
 .externalNativeBuild
+hs_err_pid*
+gradle.properties

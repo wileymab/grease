@@ -1,0 +1,166 @@
+/*
+ * Copyright 2017 Matt Wiley
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+ext.snapshot = true
+ext.major = 1
+ext.minor = 0
+ext.hotfix = 0
+
+def updateBuildInfo() {
+
+    File buildTracking = new File('.build')
+    if ( !buildTracking.exists() ) {
+
+        println " > Build tracking not found. Creating build tracking file."
+        buildTracking.createNewFile()
+
+        Map<String,String> buildInfo = new HashMap<>();
+        buildInfo.put('buildCount',0);
+        buildInfo.put('lastMajor', major);
+        buildInfo.put('lastMinor', minor);
+        buildInfo.put('simpleVersion', 1);
+
+        FileOutputStream fos = new FileOutputStream(buildTracking);
+
+        buildInfo = buildInfo.sort(new Comparator<String>() {
+            @Override
+            int compare(String lhs, String rhs) {
+                return lhs.compareTo(rhs);
+            }
+
+            @Override
+            boolean equals(Object object) {
+                return false;
+            }
+        })
+        for( Map.Entry<String,String> e : buildInfo ) {
+            fos.write( String.format("%s=%s%n", e.key, e.value.toString()).bytes )
+        }
+
+        fos.flush();
+        fos.close();
+
+    }
+    else {
+        println " > Opening build tracking file."
+        Map<String, String> buildInfo = new HashMap<String, String>();
+
+        FileInputStream fis = new FileInputStream(buildTracking);
+
+        for (String line : fis.readLines()) {
+            String[] kvp = line.split("=");
+            buildInfo.put(kvp[0], kvp[1]);
+        }
+
+        fis.close();
+
+        println " > Incrementing build count."
+        int buildCount = Integer.valueOf(buildInfo.get('buildCount'));
+        buildInfo.put('buildCount', (buildCount + 1).toString())
+
+        println " > Checking for manual version changes."
+        if (    Integer.valueOf(buildInfo.get('lastMajor')) != major ||
+                Integer.valueOf(buildInfo.get('lastMinor')) != minor
+        )
+        {
+            println " > Incrementing simple version due to major/minor version change."
+            int simpleVersion = Integer.valueOf(buildInfo.get('simpleVersion'))
+            buildInfo.put('simpleVersion', (simpleVersion+1).toString())
+        }
+
+
+        FileOutputStream fos = new FileOutputStream(buildTracking);
+
+        for( Map.Entry<String,String> e : buildInfo ) {
+            fos.write( String.format("%s=%s%n", e.key, e.value.toString()).bytes )
+        }
+
+        fos.flush();
+        fos.close();
+
+        println " > New build info recorded."
+    }
+
+}
+
+def getVersionNameString() {
+
+    File buildTracking = new File('.build')
+
+    Map<String,String> buildInfo = new HashMap<String, String>();
+    FileInputStream fis = new FileInputStream(buildTracking);
+
+    for ( String line : fis.readLines() ) {
+        String[] kvp = line.split("=");
+        buildInfo.put( kvp[0], kvp[1] );
+    }
+
+    fis.close();
+
+    return String.format("%d.%d.%d.%d%s", major, minor, hotfix, Integer.valueOf(buildInfo.get('buildCount')), (snapshot)?"-SNAPSHOT":"" )
+
+}
+
+def getVersionCodeString() {
+
+    File buildTracking = new File('.build')
+
+    Map<String,String> buildInfo = new HashMap<String, String>();
+    FileInputStream fis = new FileInputStream(buildTracking);
+
+    for ( String line : fis.readLines() ) {
+        String[] kvp = line.split("=");
+        buildInfo.put( kvp[0], kvp[1] );
+    }
+
+    fis.close();
+
+    return buildInfo.get('simpleVersion').toString();
+}
+
+def updateGradleProperties() {
+
+    File draft = new File( 'app/gradle/gradle.properties.draft' )
+
+    String versionName = getVersionNameString()
+    String versionCode = getVersionCodeString()
+
+    FileInputStream fis = new FileInputStream(draft);
+    FileOutputStream fos = new FileOutputStream('app/gradle.properties')
+    for( String line : fis.readLines() ) {
+        if ( line.contains('__versionComplex__') ) line = line.replace('__versionComplex__', versionName)
+        if ( line.contains('__versionSimple__') ) line = line.replace('__versionSimple__', versionCode)
+        fos.write(String.format("%s%n",line).bytes)
+    }
+    fos.flush()
+    fos.close()
+    fis.close()
+
+}
+
+/** ------------------------------------------------------------------------------------------------
+ * Task is a finalization of the build process which will increment the literal build count for
+ * the project.
+ */
+task postBuild << {
+    println "Starting post-build process ... "
+    updateBuildInfo()
+    updateGradleProperties()
+    println "... post-build process complete."
+}
+build.finalizedBy(postBuild)
+
+// Add task to install to local maven per this blog post, https://www.mkyong.com/maven/how-to-include-library-manully-into-maven-local-repository/
