@@ -12,6 +12,10 @@ public class Logging {
         return clazz.getSimpleName();
     }
 
+    public static <T> String tag(Object object) {
+        return tag(object.getClass());
+    }
+
 
 
     public static void error(String tag, String formatString, Object... params) {

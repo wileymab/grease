@@ -1,6 +1,5 @@
 apply plugin: 'com.android.library'
 apply from: 'gradle/auto-version.gradle'
-apply from: 'gradle/maven-local-install.gradle'
 
 android {
     compileSdkVersion 23
