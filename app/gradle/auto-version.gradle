@@ -165,10 +165,6 @@ task postBuild << {
 }
 build.finalizedBy(postBuild)
 
-// Add task to install to local maven per this blog post, https://www.mkyong.com/maven/how-to-include-library-manully-into-maven-local-repository/
-
 task installLocally(type: Exec) {
-
-    // commandLine 'mvn install:install-file -Dfile="app-release.aar" -DgroupId='+groupId+' -DartifactId='+artifactId+' -Dversion='+getVersionNameString()+' -Dpackaging=aar'
     commandLine '../shell/mvn-install-local.sh'
 }
