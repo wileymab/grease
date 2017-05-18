@@ -165,6 +165,10 @@ task postBuild << {
 }
 build.finalizedBy(postBuild)
 
+/** ------------------------------------------------------------------------------------------------
+ * Task is runs an mvn install to deploy the AAR to the local maven repo.
+ */
 task installLocally(type: Exec) {
-    commandLine '../shell/mvn-install-local.sh'
+    workingDir 'build/outputs/aar/'
+    commandLine 'mvn', 'install:install-file','-Dfile=app-release.aar','-DgroupId='+groupId,'-DartifactId='+artifactId,'-Dversion='+getVersionNameString(),'-Dpackaging=aar'
 }
